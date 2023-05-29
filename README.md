@@ -10,8 +10,7 @@ The pattern of visits is not explained well by race. Visits across sexes are als
 #### Data
 
 * [Data](data/)
-
-Request raw data [here](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VIV4TS) 
+* Raw browsing data is on [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VIV4TS) 
 
 ### Scripts
 
