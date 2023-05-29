@@ -1,4 +1,4 @@
-### Bad Domains: Exposure to Malicious Websites
+### Bad Domains: Exposure to Malicious Content
 
 
 Traditional concerns about the digital divide have been exacerbated by concerns about safety. In this paper, using passively observed domain-level browsing data for a month on 1200 Americans from YouGov and data on malicious domains from [Virustotal](https://www.virustotal.com/), we test if the poor, the less educated, the older, or the minorities are more likely to visit malicious websites than their counterparts. 
