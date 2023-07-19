@@ -2,7 +2,7 @@
 
 Traditional concerns about the digital divide have been exacerbated by concerns about safety. In this paper, using passively observed domain-level browsing data for a **month** on 1200 Americans from YouGov and data on malicious domains from [Virustotal](https://www.virustotal.com/), we test if the poor, the less educated, the older, or the minorities are more likely to visit malicious websites than their counterparts. 
 
-We find that visits to malicious websites--websites that carry exploits or other malicious artifacts--are highly skewed. The median user visited 4 different websites with malicious content over the month, the 75th percentile visited 9, the 95th percentile 16, and the 99th percentile 48. The bottom line, however, is that more than 84\% of people were exposed to malicious content over the month.
+We find that visits to malicious websites--websites that carry exploits or other malicious artifacts--are highly skewed. The median user visited 4 different websites with malicious content over the month, the 75th percentile visited 9, the 95th percentile 16, and the 99th percentile 48. In all, more than 84\% of people visited at least one website with malicious content/activity over the month.
 
 **Distribution of Number of Unique Websites With Malicious Content Visted, Number of Visits, Time Spent, And Number of Suspicious Websites Visited**
 
