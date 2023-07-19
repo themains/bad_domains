@@ -19,7 +19,10 @@ Lastly, when we look at age, there is a steady increase in the number of visits 
 
 ### Scripts
 
-* [Scripts](scripts/)
+* [Process Vote Reg. Data](scripts/01_fl_dat.ipynb)
+* [Emails Valid or Not (w/ DNS)](scripts/01a_valid_email_or_not.ipynb)
+* [Get HIBP Data](scripts/02_get_fl_hibp.ipynb)
+* [Analyze](scripts/03_concat_fl_dat_analyze.ipynb)
 
 #### Authors
 
