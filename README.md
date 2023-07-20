@@ -66,7 +66,7 @@ Lastly, when we look at age, there is a steady increase in the number of unique 
 * Raw browsing data is on [Harvard Dataverse](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VIV4TS) 
 * Virustotal data on domains is on [Harvard Dataverse](https://doi.org/10.7910/DVN/GMNP04)
 
-### Scripts
+#### Scripts
 
 * [Process YG Domain Data. Prep. For VT.](scripts/01_rank-chunk.ipynb)
 * [Query VT](scripts/02_query_virustotal.ipynb)
