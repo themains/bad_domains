@@ -68,10 +68,11 @@ Lastly, when we look at age, there is a steady increase in the number of unique 
 
 ### Scripts
 
-* [Process Vote Reg. Data](scripts/01_fl_dat.ipynb)
-* [Emails Valid or Not (w/ DNS)](scripts/01a_valid_email_or_not.ipynb)
-* [Get HIBP Data](scripts/02_get_fl_hibp.ipynb)
-* [Analyze](scripts/03_concat_fl_dat_analyze.ipynb)
+* [Process YG Domain Data. Prep. For VT.](scripts/01_rank-chunk.ipynb)
+* [Query VT](scripts/02_query_virustotal.ipynb)
+	- [Query VT Proxy](scripts/02a_query_virustotal_proxy.nbconvert.ipynb)
+* [Agg./Parse VT](scripts/03_agg_parse_virustotal.ipynb)
+* [Analyze](scripts/04_digital_gap.ipynb)
 
 #### Authors
 
