@@ -70,7 +70,7 @@ Lastly, when we look at age, there is a steady increase in the number of unique 
 
 * [Process YG Domain Data. Prep. For VT.](scripts/01_rank-chunk.ipynb)
 * [Query VT](scripts/02_query_virustotal.ipynb)
-	- [Query VT Proxy](scripts/02a_query_virustotal_proxy.nbconvert.ipynb)
+	- [Query VT via Proxy](scripts/02a_query_virustotal_proxy.nbconvert.ipynb)
 * [Agg./Parse VT](scripts/03_agg_parse_virustotal.ipynb)
 * [Analyze](scripts/04_digital_gap.ipynb)
 
