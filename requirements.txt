@@ -5,3 +5,4 @@ seaborn
 statsmodels
 scipy
 pyjanitor
+inequality
