@@ -1,0 +1,275 @@
+library(here)
+library(dplyr)
+library(tidyr)
+library(fixest)
+library(ggplot2)
+
+data_path <- here("../data", "ind_data.csv")
+
+data <- read.csv(data_path) %>%
+  mutate(
+    women = ifelse(gender_lab == "Female", 1, 0),
+    age = 2022 - birthyr,
+    mal_visitor = ifelse(malicious_visits > 0, 1, 0),  # Binary variable: 1 if malicious_duration = 0, 0 otherwise
+    private_hrs = ifelse(tod_mean >= 19 | tod_mean < 4, 1, 0),  # Private hours: 7 PM to 4 AM
+    office_hrs = ifelse(tod_mean >= 7 & tod_mean < 19, 1, 0),
+    private_hrs_mal = ifelse(tod_mean_mal >= 19 | tod_mean_mal < 4, 1, 0),
+    office_hrs_mal = ifelse(tod_mean_mal >= 7 & tod_mean_mal < 19, 1, 0),
+    private_hrs_nonmal = ifelse(tod_mean_nonmal >= 19 | tod_mean_nonmal < 4, 1, 0),
+    office_hrs_nonmal = ifelse(tod_mean_nonmal >= 7 & tod_mean_nonmal < 19, 1, 0)
+    ) %>%
+  # rescale
+  mutate(
+    visits = visits / 100,  # Scale visits
+    # to 0 to 1 to 0 to 100
+    gini = gini * 100, 
+    gini_mal = gini_mal * 100,
+    gini_nonmal = gini_nonmal * 100, 
+  ) %>%
+  # fillna to 0 for mal.
+  mutate(
+    singleton_mal = replace_na(singleton_mal, 0),
+    gini_mal = replace_na(gini_mal, 0),
+    private_hrs_mal = replace_na(private_hrs_mal, 0),
+    office_hrs_mal = replace_na(office_hrs_mal, 0),
+    nonoffice_hrs_mal = 1 - office_hrs_mal,
+    duration_mean_mal = replace_na(duration_mean_mal, 0)
+  ) %>%
+  # Mean-center continuous variables and create new columns with suffix "_mc"
+  mutate(
+    across(
+      where(~ is.numeric(.) && !all(. %in% c(0, 1))),  # Select numeric variables that are not binary
+      ~ . - mean(., na.rm = TRUE),                    # Mean-center
+      .names = "{.col}_mc"                      # Create new columns with prefix "centered_"
+    )
+  ) %>%
+  # Scale to 0-1
+  mutate(
+    age_scaled = scales::rescale(age, to = c(0, 1)),
+    visits_scaled = scales::rescale(visits, to = c(0, 1))
+  )
+
+# coef labels -------------------------------------------------------------
+COEF_LABELS = c(
+  visits = "Total domain visits",
+  visits_scaled = "Total visits (scaled)",
+  "I(visits_scaled^2)" = "Total visits$^2$ (scaled)",
+  "I(women)" = "Woman",
+  "race_lab::Black" = "Race: African American",
+  "race_lab::White" = "Race: White",
+  "race_lab::Asian" = "Race: Asian",
+  "race_lab::Hispanic" = "Race: Hispanic",
+  "race_lab::Other" = "Race: Other",
+  "educ_lab::College" = "Educ: College",
+  "educ_lab::Postgrad" = "Educ: Postgraduate",
+  "educ_lab::Somecollege" = "Educ: Some college",
+  age_mc = "Age",
+  age_scaled="Age (scaled)",
+  "I(age_scaled^2)" = "Age$^2$ (scaled)",
+  age = "Age",
+  "I(age_mc^2)" = "Age$^2$ (scaled)",
+  duration_mean="Mean dwelling time",
+  singleton="Proportion of singleton visits",
+  gini="Concentration of domain visits",
+  "I(private_hrs)"="Mean time of day: Private Hours"
+)
+
+COEF_ORDER = c(
+  "Woman",
+  "Race: African American",
+  "Race: Asian",
+  "Race: Hispanic",
+  "Race: Other",
+  "Educ: Some college",
+  "Educ: College",
+  "Educ: Postgraduate",
+  "Age",
+  "Mean dwelling time",
+  "Proportion of singleton visits",
+  "Concentration of domain visits",
+  "Mean time of day: Private Hours",
+  "Total visits (scaled)",
+  "Constant"
+)
+
+
+# Intensive margin --------------------------------------------------------
+m_gender_int = feols(
+  n_uniques_mal ~ I(women),
+  vcov = "hetero",
+  data = data
+)
+
+m_gender_visits_int = feols(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + I(women),
+  vcov = "hetero",
+  data = data
+)
+
+m_race_int = feols(
+  n_uniques_mal ~ i(race_lab, ref = "White"),
+  vcov = "hetero",
+  data = data
+)
+
+m_race_visits_int = feols(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + i(race_lab, ref = "White"),
+  vcov = "hetero",
+  data = data
+)
+
+m_educ_int = feols(
+  n_uniques_mal ~ i(educ_lab, ref = "HS or Below"),
+  vcov = "hetero",
+  data = data
+)
+
+m_educ_visits_int = feols(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + i(educ_lab, ref = "HS or Below"),
+  vcov = "hetero",
+  data = data
+)
+
+m_age_int = feols(
+  n_uniques_mal ~ age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+m_age_visits_int = feols(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+
+m_demo_int = feols(
+  n_uniques_mal ~  I(women) +
+    i(race_lab, ref = "White") +
+    i(educ_lab, ref = "HS or Below") +
+    age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+
+
+m_demo_visits_int = feols(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + I(women) +
+    i(race_lab, ref = "White") +
+    i(educ_lab, ref = "HS or Below") +
+    age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+
+etable(
+  m_gender_int,
+  m_gender_visits_int,
+  m_race_int,
+  m_race_visits_int,
+  m_educ_int,
+  m_educ_visits_int,
+  m_age_int,
+  m_age_visits_int,
+  m_demo_int,
+  m_demo_visits_int,
+  digits = 3,
+  digits.stats = 3,
+  dict = COEF_LABELS,
+  order = COEF_ORDER,
+  signif.code = "letters",
+  fitstat = c("r2", "n"),
+  se.row = FALSE,
+  tex = TRUE,
+  style.tex = style.tex("aer")
+)
+
+
+
+# Extensive margin --------------------------------------------------------
+m_gender_ext = feols(
+  mal_visitor ~ I(women),
+  vcov = "hetero",
+  data = data
+)
+
+m_gender_visits_ext = feols(
+  mal_visitor ~ visits_scaled + I(visits_scaled^2) + I(women),
+  vcov = "hetero",
+  data = data
+)
+
+m_race_ext = feols(
+  mal_visitor ~ i(race_lab, ref = "White"),
+  vcov = "hetero",
+  data = data
+)
+
+m_race_visits_ext = feols(
+  mal_visitor ~ visits_scaled + I(visits_scaled^2) + i(race_lab, ref = "White"),
+  vcov = "hetero",
+  data = data
+)
+
+m_educ_ext = feols(
+  mal_visitor ~ i(educ_lab, ref = "HS or Below"),
+  vcov = "hetero",
+  data = data
+)
+
+m_educ_visits_ext = feols(
+  mal_visitor ~ visits_scaled + I(visits_scaled^2) + i(educ_lab, ref = "HS or Below"),
+  vcov = "hetero",
+  data = data
+)
+
+m_age_ext = feols(
+  mal_visitor ~ age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+m_age_visits_ext = feols(
+  mal_visitor ~ visits_scaled + I(visits_scaled^2) + age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+
+m_demo_ext = feols(
+  mal_visitor ~  I(women) +
+    i(race_lab, ref = "White") +
+    i(educ_lab, ref = "HS or Below") +
+    age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+
+
+m_demo_visits_ext = feols(
+  mal_visitor ~ visits_scaled + I(visits_scaled^2) + I(women) +
+    i(race_lab, ref = "White") +
+    i(educ_lab, ref = "HS or Below") +
+    age_scaled + I(age_scaled^2),
+  vcov = "hetero",
+  data = data
+)
+
+etable(
+  m_gender_ext,
+  m_gender_visits_ext,
+  m_race_ext,
+  m_race_visits_ext,
+  m_educ_ext,
+  m_educ_visits_ext,
+  m_age_ext,
+  m_age_visits_ext,
+  m_demo_ext,
+  m_demo_visits_ext,
+  digits = 3,
+  digits.stats = 3,
+  dict = COEF_LABELS,
+  order = COEF_ORDER,
+  signif.code = "letters",
+  fitstat = c("r2", "n"),
+  se.row = FALSE,
+  tex = TRUE,
+  style.tex = style.tex("aer")
+)
+
