@@ -63,6 +63,11 @@ COEF_LABELS = c(
   "educ_lab::College" = "Educ: College",
   "educ_lab::Postgrad" = "Educ: Postgraduate",
   "educ_lab::Somecollege" = "Educ: Some college",
+  "agegroup_lab::<25" = "Age: 18--25",
+  "agegroup_lab::25-34" = "Age: 25--34",
+  "agegroup_lab::35-49" = "Age: 35--49",
+  "agegroup_lab::50-64" = "Age: 50--64",
+  "agegroup_lab::65+" = "Age: 65+",
   age_mc = "Age",
   age_scaled="Age (scaled)",
   "I(age_scaled^2)" = "Age$^2$ (scaled)",
@@ -141,11 +146,23 @@ m_age_visits_int = feols(
   data = data
 )
 
+m_agegroup_int = feols(
+  n_uniques_mal ~ i(agegroup_lab, ref = "<25"),
+  vcov = "hetero",
+  data = data
+)
+m_agegroup_visits_int = feols(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + i(agegroup_lab, ref = "<25"),
+  vcov = "hetero",
+  data = data
+)
+
 m_demo_int = feols(
   n_uniques_mal ~  I(women) +
     i(race_lab, ref = "White") +
     i(educ_lab, ref = "HS or Below") +
-    age_scaled + I(age_scaled^2),
+    i(agegroup_lab, ref = "<25"),
+  # age_scaled + I(age_scaled^2),
   vcov = "hetero",
   data = data
 )
@@ -155,10 +172,22 @@ m_demo_visits_int = feols(
   n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + I(women) +
     i(race_lab, ref = "White") +
     i(educ_lab, ref = "HS or Below") +
-    age_scaled + I(age_scaled^2),
+    i(agegroup_lab, ref = "<25"),
+    # age_scaled + I(age_scaled^2),
   vcov = "hetero",
   data = data
 )
+# 
+# m_demo_bev_visits_int = feols(
+#   n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + I(women) +
+#     i(race_lab, ref = "White") +
+#     i(educ_lab, ref = "HS or Below") +
+#     i(agegroup_lab, ref = "<25") +
+#     duration + gini + I(private_hrs) + singleton,    
+#   # age_scaled + I(age_scaled^2),
+#   vcov = "hetero",
+#   data = data
+# )
 
 etable(
   m_gender_int,
@@ -167,10 +196,11 @@ etable(
   m_race_visits_int,
   m_educ_int,
   m_educ_visits_int,
-  m_age_int,
-  m_age_visits_int,
+  m_agegroup_int,
+  m_agegroup_visits_int,
   m_demo_int,
   m_demo_visits_int,
+  # m_demo_bev_visits_int,
   digits = 3,
   digits.stats = 3,
   dict = COEF_LABELS,
@@ -231,12 +261,24 @@ m_age_visits_ext = feols(
   vcov = "hetero",
   data = data
 )
+m_agegroup_ext = feols(
+  mal_visitor ~ i(agegroup_lab, ref = "<25"),
+  vcov = "hetero",
+  data = data
+)
+m_agegroup_visits_ext = feols(
+  mal_visitor ~ visits_scaled + I(visits_scaled^2) + i(agegroup_lab, ref = "<25"),
+  vcov = "hetero",
+  data = data
+)
+
 
 m_demo_ext = feols(
   mal_visitor ~  I(women) +
     i(race_lab, ref = "White") +
     i(educ_lab, ref = "HS or Below") +
-    age_scaled + I(age_scaled^2),
+    i(agegroup_lab, ref = "<25"),    
+    # age_scaled + I(age_scaled^2),
   vcov = "hetero",
   data = data
 )
@@ -246,10 +288,23 @@ m_demo_visits_ext = feols(
   mal_visitor ~ visits_scaled + I(visits_scaled^2) + I(women) +
     i(race_lab, ref = "White") +
     i(educ_lab, ref = "HS or Below") +
-    age_scaled + I(age_scaled^2),
+    i(agegroup_lab, ref = "<25"),    
+    # age_scaled + I(age_scaled^2),
   vcov = "hetero",
   data = data
 )
+
+# m_demo_bev_visits_ext = feols(
+#   mal_visitor ~ visits_scaled + I(visits_scaled^2) + I(women) +
+#     i(race_lab, ref = "White") +
+#     i(educ_lab, ref = "HS or Below") +
+#     i(agegroup_lab, ref = "<25") +
+#     duration + gini + I(private_hrs) + singleton,    
+#   # age_scaled + I(age_scaled^2),
+#   vcov = "hetero",
+#   data = data
+# )
+
 
 etable(
   m_gender_ext,
@@ -258,10 +313,11 @@ etable(
   m_race_visits_ext,
   m_educ_ext,
   m_educ_visits_ext,
-  m_age_ext,
-  m_age_visits_ext,
+  m_agegroup_ext,
+  m_agegroup_visits_ext,
   m_demo_ext,
   m_demo_visits_ext,
+  # m_demo_bev_visits_ext,
   digits = 3,
   digits.stats = 3,
   dict = COEF_LABELS,
