@@ -97,7 +97,6 @@ COEF_ORDER = c(
   "Constant"
 )
 
-
 # Intensive margin --------------------------------------------------------
 m_gender_int = feols(
   n_uniques_mal ~ I(women),
@@ -212,6 +211,138 @@ etable(
   style.tex = style.tex("aer")
 )
 
+# Intensive margin (medians) ----------------------------------------------
+library(quantreg)
+set.seed(0)
+
+data$race_lab <- relevel(as.factor(data$race_lab), ref = "White")
+data$educ_lab <- relevel(as.factor(data$educ_lab), ref = "HS or Below")
+data$agegroup_lab <- relevel(as.factor(data$agegroup_lab), ref = "<25")
+
+# Define quantiles of interest
+tau <- 0.5  # Median regression
+
+# https://stackoverflow.com/questions/28393176/error-in-summary-quantreg-backsolve
+
+# Gender models
+m_gender_int_qr <- rq(
+  n_uniques_mal ~ women,
+  tau = tau,
+  data = data
+)
+summary(m_gender_int_qr, se = "boot")
+
+m_gender_visits_int_qr <- rq(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + women,
+  tau = tau,
+  data = data
+)
+summary(m_gender_visits_int_qr, se = "boot")
+
+# Race models
+m_race_int_qr <- rq(
+  n_uniques_mal ~ race_lab,
+  tau = tau,
+  data = data,
+)
+summary(m_race_int_qr, se = "boot")
+
+m_race_visits_int_qr <- rq(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + race_lab,
+  tau = tau,
+  data = data
+)
+summary(m_race_visits_int_qr, se = "boot")
+
+# Education models
+m_educ_int_qr <- rq(
+  n_uniques_mal ~ educ_lab,
+  tau = tau,
+  data = data
+)
+summary(m_educ_int_qr, se = "boot")
+
+m_educ_visits_int_qr <- rq(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + educ_lab,
+  tau = tau,
+  data = data
+)
+summary(m_educ_visits_int_qr, se = "boot")
+
+# Age models
+m_age_int_qr <- rq(
+  n_uniques_mal ~ age_scaled + I(age_scaled^2),
+  tau = tau,
+  data = data
+)
+summary(m_age_int_qr, se = "boot")
+
+m_age_visits_int_qr <- rq(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + age_scaled + I(age_scaled^2),
+  tau = tau,
+  data = data
+)
+summary(m_age_visits_int_qr, se = "boot")
+
+# Age group models
+m_agegroup_int_qr <- rq(
+  n_uniques_mal ~ agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_agegroup_int_qr, se = "boot")
+
+m_agegroup_visits_int_qr <- rq(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_agegroup_visits_int_qr, se = "boot")
+
+# Demographics model
+m_demo_int_qr <- rq(
+  n_uniques_mal ~ women +
+    race_lab +
+    educ_lab +
+    agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_demo_int_qr, se = "boot")
+
+m_demo_visits_int_qr <- rq(
+  n_uniques_mal ~ visits_scaled + I(visits_scaled^2) + women +
+    race_lab +
+    educ_lab +
+    agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_demo_visits_int_qr, se = "boot")
+
+library(stargazer)
+stargazer(
+  m_gender_int_qr,
+  m_gender_visits_int_qr,
+  m_race_visits_int_qr,
+  # m_educ_visits_int_qr,
+  # m_agegroup_visits_int_qr,
+  model.names=FALSE,
+  rq.se="boot",
+  # covariate.labels = COEF_LABELS,
+  type="text"
+)
+stargazer(
+  # m_gender_int_qr,
+  # m_gender_visits_int_qr,
+  # m_race_visits_int_qr,
+  m_educ_visits_int_qr,
+  m_agegroup_visits_int_qr,
+  model.names=FALSE,
+  rq.se="boot",
+  # covariate.labels = COEF_LABELS,
+  type="text"
+)
 
 
 # Extensive margin --------------------------------------------------------
@@ -328,4 +459,3 @@ etable(
   tex = TRUE,
   style.tex = style.tex("aer")
 )
-
