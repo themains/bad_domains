@@ -3,8 +3,10 @@ library(dplyr)
 library(tidyr)
 library(fixest)
 library(ggplot2)
+library(quantreg)
+library(stargazer)
 
-data_path <- here("../data", "ind_data.csv")
+data_path <- here("data", "ind_data.csv")
 
 data <- read.csv(data_path) %>%
   mutate(
@@ -212,7 +214,7 @@ etable(
 )
 
 # Intensive margin (medians) ----------------------------------------------
-library(quantreg)
+
 set.seed(0)
 
 data$race_lab <- relevel(as.factor(data$race_lab), ref = "White")
@@ -320,7 +322,6 @@ m_demo_visits_int_qr <- rq(
 )
 summary(m_demo_visits_int_qr, se = "boot")
 
-library(stargazer)
 stargazer(
   m_gender_int_qr,
   m_gender_visits_int_qr,
