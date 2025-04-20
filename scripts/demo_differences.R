@@ -6,7 +6,9 @@ library(ggplot2)
 library(quantreg)
 library(stargazer)
 
-data_path <- here("data", "ind_data.csv")
+source("utils.R")
+
+data_path <- here("../data", "ind_data.csv")
 
 data <- read.csv(data_path) %>%
   mutate(
@@ -24,9 +26,10 @@ data <- read.csv(data_path) %>%
   mutate(
     visits = visits / 100,  # Scale visits
     # to 0 to 1 to 0 to 100
-    gini = gini * 100, 
-    gini_mal = gini_mal * 100,
-    gini_nonmal = gini_nonmal * 100, 
+    gini = 100 * gini, 
+    gini_mal = 100 * gini_mal,
+    gini_nonmal = 100 * gini_nonmal, 
+    perc_mal = 100 * n_uniques_mal / n_uniques
   ) %>%
   # fillna to 0 for mal.
   mutate(
@@ -51,7 +54,7 @@ data <- read.csv(data_path) %>%
     visits_scaled = scales::rescale(visits, to = c(0, 1))
   )
 
-# coef labels -------------------------------------------------------------
+# coef labels ---------------------------------------------------------------
 COEF_LABELS = c(
   visits = "Total domain visits",
   visits_scaled = "Total visits (scaled)",
@@ -99,7 +102,7 @@ COEF_ORDER = c(
   "Constant"
 )
 
-# Intensive margin --------------------------------------------------------
+# Intensive margin (means) --------------------------------------------------
 m_gender_int = feols(
   n_uniques_mal ~ I(women),
   vcov = "hetero",
@@ -214,15 +217,12 @@ etable(
 )
 
 # Intensive margin (medians) ----------------------------------------------
-
-set.seed(0)
-
 data$race_lab <- relevel(as.factor(data$race_lab), ref = "White")
 data$educ_lab <- relevel(as.factor(data$educ_lab), ref = "HS or Below")
 data$agegroup_lab <- relevel(as.factor(data$agegroup_lab), ref = "<25")
 
-# Define quantiles of interest
-tau <- 0.5  # Median regression
+set.seed(0)
+tau <- 0.5
 
 # https://stackoverflow.com/questions/28393176/error-in-summary-quantreg-backsolve
 
@@ -322,28 +322,64 @@ m_demo_visits_int_qr <- rq(
 )
 summary(m_demo_visits_int_qr, se = "boot")
 
-stargazer(
-  m_gender_int_qr,
-  m_gender_visits_int_qr,
-  m_race_visits_int_qr,
-  # m_educ_visits_int_qr,
-  # m_agegroup_visits_int_qr,
-  model.names=FALSE,
-  rq.se="boot",
-  # covariate.labels = COEF_LABELS,
-  type="text"
+# stargazer(
+#   m_gender_int_qr,
+#   m_gender_visits_int_qr,
+#   m_race_visits_int_qr,
+#   # m_educ_visits_int_qr,
+#   # m_agegroup_visits_int_qr,
+#   model.names=FALSE,
+#   rq.se="boot",
+#   # covariate.labels = COEF_LABELS,
+#   type="text"
+# )
+# stargazer(
+#   # m_gender_int_qr,
+#   # m_gender_visits_int_qr,
+#   # m_race_visits_int_qr,
+#   m_educ_visits_int_qr,
+#   m_agegroup_visits_int_qr,
+#   model.names=FALSE,
+#   rq.se="boot",
+#   # covariate.labels = COEF_LABELS,
+#   type="text"
+# )
+
+model_list <- list(
+  Model1 = summary(m_gender_int_qr, se = "boot", R=1000)$coef,
+  Model2 = summary(m_gender_visits_int_qr, se = "boot", R=1000)$coef,
+  Model3 = summary(m_race_int_qr, se = "boot", R=1000)$coef,
+  Model4 = summary(m_race_visits_int_qr, se = "boot", R=1000)$coef,
+  Model5 = summary(m_educ_int_qr, se = "boot", R=1000)$coef,
+  Model6 = summary(m_educ_visits_int_qr, se = "boot", R=1000)$coef,
+  Model7 = summary(m_agegroup_int_qr, se = "boot", R=1000)$coef,
+  Model8 = summary(m_agegroup_visits_int_qr, se = "boot", R=1000)$coef,
+  Model9 = summary(m_demo_int_qr, se = "boot", R=1000)$coef,
+  Model10 = summary(m_demo_visits_int_qr, se = "boot", R=1000)$coef
 )
-stargazer(
-  # m_gender_int_qr,
-  # m_gender_visits_int_qr,
-  # m_race_visits_int_qr,
-  m_educ_visits_int_qr,
-  m_agegroup_visits_int_qr,
-  model.names=FALSE,
-  rq.se="boot",
-  # covariate.labels = COEF_LABELS,
-  type="text"
+
+COEF_LABELS2 = c(
+  visits_scaled = "Total visits (scaled)",
+  "I(visits_scaled^2)" = "Total visits$^2$ (scaled)",
+  "(Intercept)" = "Constant",
+  "women" = "Woman",
+  "race_labBlack" = "Race: African American",
+  "race_labAsian" = "Race: Asian",
+  "race_labHispanic" = "Race: Hispanic",
+  "race_labOther" = "Race: Other",
+  "educ_labCollege" = "Educ: College",
+  "educ_labPostgrad" = "Educ: Postgraduate",
+  "educ_labSome college" = "Educ: Some college",
+  "agegroup_lab::<25" = "Age: 18--25",
+  "agegroup_lab25-34" = "Age: 25--34",
+  "agegroup_lab35-49" = "Age: 35--49",
+  "agegroup_lab50-64" = "Age: 50--64",
+  "agegroup_lab65+" = "Age: 65+"
 )
+
+latex_output <- generate_latex_table(model_list, COEF_LABELS2)
+
+cat(latex_output)
 
 
 # Extensive margin --------------------------------------------------------
@@ -460,3 +496,104 @@ etable(
   tex = TRUE,
   style.tex = style.tex("aer")
 )
+
+
+
+# Intensive margin (perc mal_domains / domains) -----------------------------
+# Gender models
+m_gender_int_qr_perc <- rq(
+  perc_mal ~ women,
+  tau = tau,
+  data = data
+)
+summary(m_gender_int_qr_perc, se = "boot")
+
+m_gender_visits_int_qr_perc <- rq(
+  perc_mal ~ visits_scaled + I(visits_scaled^2) + women,
+  tau = tau,
+  data = data
+)
+summary(m_gender_visits_int_qr_perc, se = "boot")
+
+# Race models
+m_race_int_qr_perc <- rq(
+  perc_mal ~ race_lab,
+  tau = tau,
+  data = data
+)
+summary(m_race_int_qr_perc, se = "boot")
+
+m_race_visits_int_qr_perc <- rq(
+  perc_mal ~ visits_scaled + I(visits_scaled^2) + race_lab,
+  tau = tau,
+  data = data
+)
+summary(m_race_visits_int_qr_perc, se = "boot")
+
+# Education models
+m_educ_int_qr_perc <- rq(
+  perc_mal ~ educ_lab,
+  tau = tau,
+  data = data
+)
+summary(m_educ_int_qr_perc, se = "boot")
+
+m_educ_visits_int_qr_perc <- rq(
+  perc_mal ~ visits_scaled + I(visits_scaled^2) + educ_lab,
+  tau = tau,
+  data = data
+)
+summary(m_educ_visits_int_qr_perc, se = "boot")
+
+# Age group models
+m_agegroup_int_qr_perc <- rq(
+  perc_mal ~ agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_agegroup_int_qr_perc, se = "boot")
+
+m_agegroup_visits_int_qr_perc <- rq(
+  perc_mal ~ visits_scaled + I(visits_scaled^2) + agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_agegroup_visits_int_qr_perc, se = "boot")
+
+# Demographics model
+m_demo_int_qr_perc <- rq(
+  perc_mal ~ women +
+    race_lab +
+    educ_lab +
+    agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_demo_int_qr_perc, se = "boot")
+
+m_demo_visits_int_qr_perc <- rq(
+  perc_mal ~ visits_scaled + I(visits_scaled^2) + women +
+    race_lab +
+    educ_lab +
+    agegroup_lab,
+  tau = tau,
+  data = data
+)
+summary(m_demo_visits_int_qr_perc, se = "boot")
+
+model_list_perc <- list(
+  Model1 = summary(m_gender_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model2 = summary(m_gender_visits_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model3 = summary(m_race_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model4 = summary(m_race_visits_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model5 = summary(m_educ_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model6 = summary(m_educ_visits_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model7 = summary(m_agegroup_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model8 = summary(m_agegroup_visits_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model9 = summary(m_demo_int_qr_perc, se = "boot", R = 1000)$coef,
+  Model10 = summary(m_demo_visits_int_qr_perc, se = "boot", R = 1000)$coef
+)
+
+latex_output_perc <- generate_latex_table(model_list_perc, COEF_LABELS2)
+
+cat(latex_output_perc)
