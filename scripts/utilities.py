@@ -36,6 +36,7 @@ try:
 except ModuleNotFoundError:
     pass
 import matplotlib.pyplot as plt
+
 try:
     import msoffcrypto
 except ModuleNotFoundError:
@@ -950,4 +951,4 @@ def calculate_summary_statistics(
             groupby_column
         ].replace(category_names)
 
-    return summary_with_percentiles        
+    return summary_with_percentiles
