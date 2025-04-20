@@ -88,3 +88,84 @@ generate_latex_table <- function(model_list, coef_names = NULL) {
 # 
 # # Print the table for integration into LaTeX
 # cat(latex_output)
+
+
+print_tex <- function(path) {
+  if (file.exists(path)) {
+    cat(readLines(path), sep = "\n")
+  } else {
+    message("File not found: ", path)
+  }
+}
+
+
+# =========================================================================
+# =========================================================================
+# =========================================================================
+# Constants ---------------------------------------------------------------
+COEF_LABELS = c(
+  visits = "Total domain visits",
+  visits_scaled = "Total visits (scaled)",
+  "I(visits_scaled^2)" = "Total visits$^2$ (scaled)",
+  "I(women)" = "Woman",
+  "race_lab::Black" = "Race: African American",
+  "race_lab::White" = "Race: White",
+  "race_lab::Asian" = "Race: Asian",
+  "race_lab::Hispanic" = "Race: Hispanic",
+  "race_lab::Other" = "Race: Other",
+  "educ_lab::College" = "Educ: College",
+  "educ_lab::Postgrad" = "Educ: Postgraduate",
+  "educ_lab::Somecollege" = "Educ: Some college",
+  "agegroup_lab::<25" = "Age: 18--25",
+  "agegroup_lab::25-34" = "Age: 25--34",
+  "agegroup_lab::35-49" = "Age: 35--49",
+  "agegroup_lab::50-64" = "Age: 50--64",
+  "agegroup_lab::65+" = "Age: 65+",
+  age_mc = "Age",
+  age_scaled="Age (scaled)",
+  "I(age_scaled^2)" = "Age$^2$ (scaled)",
+  age = "Age",
+  "I(age_mc^2)" = "Age$^2$ (scaled)",
+  duration_mean="Mean dwelling time",
+  singleton="Proportion of singleton visits",
+  gini="Concentration of domain visits",
+  "I(private_hrs)"="Mean time of day: Private Hours"
+)
+
+COEF_ORDER = c(
+  "Woman",
+  "Race: African American",
+  "Race: Asian",
+  "Race: Hispanic",
+  "Race: Other",
+  "Educ: Some college",
+  "Educ: College",
+  "Educ: Postgraduate",
+  "Age",
+  "Mean dwelling time",
+  "Proportion of singleton visits",
+  "Concentration of domain visits",
+  "Mean time of day: Private Hours",
+  "Total visits (scaled)",
+  "Constant"
+)
+
+COEF_LABELS2 = c(
+  visits_scaled = "Total visits (scaled)",
+  "I(visits_scaled^2)" = "Total visits$^2$ (scaled)",
+  "(Intercept)" = "Constant",
+  "women" = "Woman",
+  "race_labBlack" = "Race: African American",
+  "race_labAsian" = "Race: Asian",
+  "race_labHispanic" = "Race: Hispanic",
+  "race_labOther" = "Race: Other",
+  "educ_labCollege" = "Educ: College",
+  "educ_labPostgrad" = "Educ: Postgraduate",
+  "educ_labSome college" = "Educ: Some college",
+  "agegroup_lab::<25" = "Age: 18--25",
+  "agegroup_lab25-34" = "Age: 25--34",
+  "agegroup_lab35-49" = "Age: 35--49",
+  "agegroup_lab50-64" = "Age: 50--64",
+  "agegroup_lab65+" = "Age: 65+"
+)
+

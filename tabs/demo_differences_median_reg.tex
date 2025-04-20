@@ -1,0 +1,38 @@
+\begin{table}[!h]
+\centering
+\begin{tabular}{l|c|c|c|c|c|c|c|c|c|c}
+\hline
+Variable & Model 1 & Model 2 & Model 3 & Model 4 & Model 5 & Model 6 & Model 7 & Model 8 & Model 9 & Model 10\\
+\hline
+Constant & 1.000\sym{a}{(0.063)} & -0.002{(0.100)} & 0.000{(0.500)} & -0.023\sym{a}{(0.008)} & 1.000\sym{a}{(0.104)} & -0.001{(0.223)} & 1.000\sym{b}{(0.435)} & 0.398{(0.322)} & 1.000\sym{b}{(0.431)} & 0.377{(0.317)}\\
+\hline
+I(women) & -1.000\sym{a}{(0.303)} & -0.036{(0.099)} & NA & NA & NA & NA & NA & NA & -0.500{(0.373)} & -0.078{(0.078)}\\
+\hline
+Total visits (scaled) & NA & 13.526\sym{a}{(1.658)} & NA & 12.875\sym{a}{(1.724)} & NA & 13.674\sym{a}{(1.719)} & NA & 13.388\sym{a}{(1.618)} & NA & 13.325\sym{a}{(1.709)}\\
+\hline
+Total visits$^2$ (scaled) & NA & -11.413\sym{b}{(4.639)} & NA & -10.299\sym{b}{(4.693)} & NA & -11.603\sym{b}{(4.655)} & NA & -11.141\sym{b}{(4.535)} & NA & -11.077\sym{b}{(4.755)}\\
+\hline
+i(race_lab, ref = "White")Asian & NA & NA & -0.000{(0.705)} & -0.016{(0.102)} & NA & NA & NA & NA & -0.000{(0.291)} & -0.063{(0.143)}\\
+\hline
+i(race_lab, ref = "White")Black & NA & NA & 1.000\sym{b}{(0.502)} & 0.384{(0.241)} & NA & NA & NA & NA & 0.500{(0.369)} & 0.332{(0.211)}\\
+\hline
+i(race_lab, ref = "White")Hispanic & NA & NA & -0.000{(0.687)} & 0.007{(0.061)} & NA & NA & NA & NA & -0.000{(0.206)} & -0.003{(0.072)}\\
+\hline
+i(race_lab, ref = "White")Other & NA & NA & 1.000{(0.631)} & 0.017{(0.171)} & NA & NA & NA & NA & 0.500{(0.382)} & 0.030{(0.178)}\\
+\hline
+i(educ_lab, ref = "HS or Below")College & NA & NA & NA & NA & 0.000{(0.470)} & -0.076{(0.219)} & NA & NA & -0.000{(0.327)} & -0.111{(0.142)}\\
+\hline
+i(educ_lab, ref = "HS or Below")Postgrad & NA & NA & NA & NA & -1.000\sym{a}{(0.321)} & -0.072{(0.224)} & NA & NA & -0.500{(0.353)} & -0.119{(0.155)}\\
+\hline
+i(educ_lab, ref = "HS or Below")Some college & NA & NA & NA & NA & -1.000\sym{b}{(0.506)} & -0.021{(0.223)} & NA & NA & -0.500{(0.345)} & -0.106{(0.145)}\\
+\hline
+i(agegroup_lab, ref = "<25")25-34 & NA & NA & NA & NA & NA & NA & 0.000{(0.669)} & -0.400{(0.337)} & -0.000{(0.375)} & -0.268{(0.284)}\\
+\hline
+i(agegroup_lab, ref = "<25")35-49 & NA & NA & NA & NA & NA & NA & -1.000{(0.605)} & -0.418{(0.322)} & -0.000{(0.371)} & -0.298{(0.273)}\\
+\hline
+i(agegroup_lab, ref = "<25")50-64 & NA & NA & NA & NA & NA & NA & 0.000{(0.618)} & -0.418{(0.323)} & 0.000{(0.410)} & -0.276{(0.277)}\\
+\hline
+i(agegroup_lab, ref = "<25")65+ & NA & NA & NA & NA & NA & NA & 0.000{(0.507)} & -0.426{(0.325)} & 0.000{(0.430)} & -0.324{(0.279)}\\
+\hline
+\end{tabular}
+\end{table}
