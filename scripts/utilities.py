@@ -29,7 +29,7 @@ import json
 import os
 import re
 from datetime import datetime, timedelta
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Optional, Union, Tuple
 
 try:
     import cairosvg
@@ -48,6 +48,8 @@ import yaml
 from matplotlib.pyplot import Axes
 from PIL import Image
 from tableone import TableOne
+
+import statsmodels.api as sm
 
 
 def save_mpl_fig(
@@ -952,3 +954,143 @@ def calculate_summary_statistics(
         ].replace(category_names)
 
     return summary_with_percentiles
+
+
+def plot_lowess_with_ci(
+    x: np.ndarray,
+    y: np.ndarray,
+    save_path: str,
+    ylabel: str,
+    title_suffix: str = "",
+    annotate: bool = True,
+    winsor_limits: Optional[Tuple[float, float]] = None,
+    bins: Optional[List[float]] = None,
+    labels: Optional[List[str]] = None,
+    n_boot: int = 1000,
+    frac: float = 0.5,
+    figsize_scale: float = 0.9,
+    aspect_ratio: Tuple[int, int] = (16, 9),
+    font_label: int = 22,
+    font_tick: int = 19,
+    font_annot: int = 24,
+) -> None:
+    """
+    Plot a bootstrapped LOWESS curve with 95% confidence intervals and optional cohort annotations.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Array of x-values (typically birth years).
+    y : np.ndarray
+        Outcome variable (e.g., malicious site count or percent).
+    save_path : str
+        Path to save the resulting figure.
+    ylabel : str
+        Y-axis label for the plot.
+    title_suffix : str, optional
+        Not used in this version, but can be added to figure title or file name if needed.
+    annotate : bool, default True
+        Whether to add cohort label annotations and vertical dividers.
+    winsor_limits : tuple of float, optional
+        Winsorization limits (e.g., (0.0, 0.2)). If None, skips winsorization.
+    bins : list of float, optional
+        Bin edges for birth year cohorts (used for annotations).
+    labels : list of str, optional
+        Labels for each cohort bin (must be len(bins) - 1).
+    n_boot : int, default 1000
+        Number of bootstrap replications for LOWESS.
+    frac : float, default 0.5
+        Smoothing span for LOWESS.
+    figsize_scale : float, default 0.9
+        Scalar to adjust base figure size.
+    aspect_ratio : tuple of int, default (16, 9)
+        Aspect ratio of the figure.
+    font_label : int, default 22
+        Font size for axis labels.
+    font_tick : int, default 19
+        Font size for tick labels.
+    font_annot : int, default 24
+        Font size for cohort label annotations.
+
+    Returns
+    -------
+    None
+        Saves a figure to `save_path`. Does not return anything.
+    """
+
+    # Setup
+    figsize = tuple(k * figsize_scale for k in aspect_ratio)
+    fig, ax = plt.subplots(figsize=figsize)
+
+    # Winsorize if needed
+    if winsor_limits is not None:
+        from scipy.stats.mstats import winsorize
+
+        y = winsorize(y, limits=winsor_limits)
+
+    # Bootstrapped LOWESS
+    lowess_boots = []
+    for _ in range(n_boot):
+        sample_idx = np.random.choice(len(x), size=len(x), replace=True)
+        x_sample = x[sample_idx]
+        y_sample = y[sample_idx]
+        lowess_sample = sm.nonparametric.lowess(
+            y_sample, x_sample, frac=frac, return_sorted=True
+        )
+        lowess_interp = np.interp(x, lowess_sample[:, 0], lowess_sample[:, 1])
+        lowess_boots.append(lowess_interp)
+
+    lowess_boots = np.array(lowess_boots)
+    lowess_mean = np.mean(lowess_boots, axis=0)
+    lowess_lower = np.percentile(lowess_boots, 2.5, axis=0)
+    lowess_upper = np.percentile(lowess_boots, 97.5, axis=0)
+
+    # Sort
+    sort_idx = np.argsort(x)
+    x_sorted = x[sort_idx]
+    mean_sorted = lowess_mean[sort_idx]
+    lower_sorted = lowess_lower[sort_idx]
+    upper_sorted = lowess_upper[sort_idx]
+
+    # Plot LOWESS and CI
+    plt.plot(
+        x_sorted, mean_sorted, color="teal", lw=2.5, alpha=0.6, label="LOWESS", zorder=1
+    )
+    plt.fill_between(
+        x_sorted,
+        lower_sorted,
+        upper_sorted,
+        color=".3",
+        alpha=0.2,
+        label="95% CI",
+        zorder=0,
+    )
+
+    # Axes and labels
+    plt.legend(frameon=False, loc="lower left", fontsize=font_label)
+    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.xlabel("Birth year", size=font_label)
+    plt.ylabel(ylabel, size=font_label)
+    ax.tick_params(labelsize=font_tick)
+    plt.tight_layout()
+    plt.locator_params(axis="y", nbins=8)
+    plt.ylim(bottom=min(lower_sorted) * 0.98, top=max(upper_sorted) * 1.005)
+    plt.xlim(min(x) - 1, max(x) + 1)
+
+    # Annotations
+    if annotate and bins is not None and labels is not None:
+        for i in range(len(bins) - 1):
+            mid_point = (bins[i] + bins[i + 1]) / 2
+            plt.text(
+                mid_point,
+                max(upper_sorted) * 0.97,
+                f"{labels[i]}",
+                ha="center",
+                fontsize=font_annot,
+                color=".25",
+            )
+        for birth_year in bins[1:-1]:
+            plt.axvline(x=birth_year, color="grey", linestyle="--", lw=1.5)
+
+    # Save
+    save_mpl_fig(save_path)
