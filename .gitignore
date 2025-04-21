@@ -5,15 +5,28 @@ venv*
 Copy*.ipynb
 Untitled*.ipynb
 _*.ipynb
-scratch/*
+**/scratch/*
+**/payloads_json/*
 *xlsx
 **/*.tar.gz
 **/*.csv*
 **/*.xls
 **/*.xlsx
+
+### R ###
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+.RDataTmp
+
+# User-specific files
+.Ruserdata
+
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
-
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
