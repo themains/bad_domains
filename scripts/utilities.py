@@ -47,7 +47,6 @@ import pytz
 import yaml
 from matplotlib.pyplot import Axes
 from PIL import Image
-from tableone import TableOne
 
 import statsmodels.api as sm
 
@@ -210,54 +209,6 @@ def pandas_to_tex(
     # "Misplaced \noalign" LaTeX error when I use \bottomrule
     # tex_table_fragment = tex_table_fragment[:-2]
 
-    with open(texfile, "w") as tf:
-        tf.write(tex_table_fragment)
-    return None
-
-
-def tableone_to_texfrag(tableone: TableOne, texfile: str) -> None:
-    r"""
-    Convert a TableOne object to a LaTeX table fragment and save it to a file.
-
-    Parameters
-    ----------
-    tableone : tableone.TableOne
-        The TableOne object to convert to LaTeX.
-    texfile : str
-        The name or path of the output LaTeX file.
-
-    Returns
-    -------
-    None
-
-    Description
-    -----------
-    This function takes a TableOne object, generates a LaTeX table fragment
-    using the 'latex' table format, and saves it to a specified file.
-
-    The generated LaTeX table fragment will include the table body without
-    the table environment commands (\begin{tabular}, \end{tabular}),
-    the headers, and the top and bottom horizontal lines.
-
-    The function removes the last '\\' in the LaTeX fragment to prevent
-    the "Misplaced \noalign" LaTeX error when using \bottomrule.
-
-    The function will append the '.tex' extension to the texfile if it is
-    not already present. If the file already exists, it will be overwritten.
-    """
-    tex_table = tableone.tabulate(tablefmt="latex")
-    # line #1 = \begin{tabular}...
-    # line #2 = headers..
-    # line #3 = \hline
-    # last line = \end{tabular}
-    # 2nd last line = \hline
-    tex_table_fragment = "\n".join(tex_table.split("\n")[4:-2])
-    # Remove the last \\ in the tex fragment to prevent the annoying
-    # "Misplaced \noalign" LaTeX error when I use \bottomrule
-    tex_table_fragment = tex_table_fragment[:-2]
-    # Save
-    if texfile.split(".")[-1] != "tex":
-        texfile += ".tex"
     with open(texfile, "w") as tf:
         tf.write(tex_table_fragment)
     return None

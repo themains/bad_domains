@@ -10,6 +10,6 @@ jupyter_contrib_nbextensions
 jupyter_nbextensions_configurator
 jupyterthemes
 traitlets==5.9.0
-tableone
+sidetable
 inequality
 statsmodels
