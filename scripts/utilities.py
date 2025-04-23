@@ -1,28 +1,39 @@
-"""A collection of common utility functions.
-
-* save_mpl_fig (I/O) 
-* split_dataframe
-* split_dataframe2
-* save_excelsheet (I/O)
-* pandas_to_tex (I/O)
-* pprint_dict
-* save_json (I/O)
-* save_jsongz (I/O)
-* read_json (I/O)
-* read_jsons (I/O)
-* read_jsongz (I/O)
-* read_jsongzs (I/O)
-* get_datestr_list
-* normalize_str
-* unix2datetime
-* read_yaml (I/O)
-* save_dict_to_yaml (I/O)
-* save_svg_as_png (I/O)
-* change_barwidth (mpl)
-* text_to_list (I/O
-* format_tiny_pval_expoential
 """
+A collection of common utility functions for I/O, plotting, and data manipulation.
 
+Includes:
+- I/O and file handling:
+    * save_mpl_fig
+    * save_excelsheet
+    * pandas_to_tex
+    * save_json
+    * save_jsongz
+    * read_json
+    * read_jsons
+    * read_jsongz
+    * read_jsongzs
+    * read_yaml
+    * save_dict_to_yaml
+    * save_svg_as_png
+    * text_to_list
+    * read_encrypted_excel
+
+- String, datetime, and formatting:
+    * normalize_str
+    * unix2datetime
+    * get_datestr_list
+    * format_tiny_pval_exponential
+    * pprint_dict
+
+- Data manipulation:
+    * split_dataframe
+    * split_dataframe2
+    * calculate_summary_statistics
+
+- Visualization and plotting:
+    * change_barwidth
+    * plot_lowess_with_ci
+"""
 import gzip
 import io
 import json
@@ -204,7 +215,7 @@ def pandas_to_tex(
         texfile += ".tex"
 
     tex_table = df.to_latex(index=index, header=False, escape=escape, **kwargs)
-    tex_table_fragment = "\n".join(tex_table.split("\n")[2:-3])
+    tex_table_fragment = "\n".join(tex_table.split("\n")[3:-3])
     # Remove the last \\ in the tex fragment to prevent the annoying
     # "Misplaced \noalign" LaTeX error when I use \bottomrule
     # tex_table_fragment = tex_table_fragment[:-2]
