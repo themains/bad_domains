@@ -12,6 +12,7 @@ _*.ipynb
 **/*.csv*
 **/*.xls
 **/*.xlsx
+gsb_api_key.txt
 
 ### R ###
 # History files
